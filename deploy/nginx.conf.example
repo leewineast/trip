@@ -1,0 +1,36 @@
+# nginx 配置示例 —— 部署时复制并修改 server_name / root
+# sudo cp deploy/nginx.conf.example /etc/nginx/sites-available/flight.conf
+# sudo ln -s /etc/nginx/sites-available/flight.conf /etc/nginx/sites-enabled/
+# sudo nginx -t && sudo systemctl reload nginx
+
+server {
+    listen 80;
+    # listen 443 ssl http2;  # 启用 HTTPS 时打开
+    server_name your-domain.com;          # 改成你的域名/IP
+
+    # 前端静态资源(Vite 构建产物)
+    root /opt/flight-booking/dist;        # 改成实际部署路径
+    index index.html;
+
+    # ---- 关键:把真实访客 IP 透传给后端 ----
+    location /api/ {
+        proxy_pass http://127.0.0.1:3001;
+        proxy_http_version 1.1;
+        proxy_set_header Host              $host;
+        proxy_set_header X-Real-IP         $remote_addr;
+        proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_read_timeout 30s;
+    }
+
+    # SPA 前端路由回退
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    # 静态资源长缓存
+    location ~* \.(?:js|css|png|jpg|jpeg|gif|svg|ico|woff2?)$ {
+        expires 30d;
+        add_header Cache-Control "public";
+    }
+}

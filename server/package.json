@@ -1,0 +1,13 @@
+{
+  "name": "flight-booking-server",
+  "private": true,
+  "type": "module",
+  "version": "1.0.0",
+  "description": "Backend: real-IP detection, IP geolocation, geolocation↔IP linking, access logging",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}
